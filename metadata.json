@@ -1,0 +1,5 @@
+{
+  "name": "Copy of Bitcoin Miner Idle Game",
+  "description": "A clicker idle game simulating Bitcoin mining. Click to generate hashes, mine blocks for BTC, sell BTC on a fluctuating market, and buy upgrades to boost your mining operation.",
+  "requestFramePermissions": []
+}

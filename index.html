@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bitcoin Miner Idle Game</title>
+    <link rel="stylesheet" href="index.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💰</text></svg>">
+<script type="importmap">
+{
+  "imports": {
+    "@google/genai": "https://esm.sh/@google/genai@^1.0.0",
+    "marked": "https://esm.sh/marked@^15.0.12"
+  }
+}
+</script>
+</head>
+<body>
+    <div id="floating-btc-container"></div>
+    <div id="popup-message-area"></div>
+
+    <div class="container">
+        <header>
+            <h1>Bitcoin Miner Tycoon</h1>
+        </header>
+
+        <div class="game-layout">
+            <div class="stats-and-core">
+                <section id="stats-panel" aria-labelledby="stats-heading">
+                    <h2 id="stats-heading"><span class="header-icon">📊</span> Your Stats</h2>
+                    <div class="stat-item">
+                        <span class="stat-label">Current Date:</span>
+                        <span id="current-date">Jan 1, 2010</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">BTC Balance:</span>
+                        <span id="btc-balance">0.0000 BTC</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">$ Balance:</span>
+                        <span id="dollar-balance">$0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">BTC Price:</span>
+                        <span id="btc-price">$0 / BTC</span>
+                    </div>
+                     <div class="stat-item">
+                        <span class="stat-label">Base BTC Price:</span>
+                        <span id="base-btc-price">$0 / BTC</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Current Hashes:</span>
+                        <span id="current-hashes">0 / 1000 H</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Total Hash Rate:</span>
+                        <span id="total-hash-rate-container">
+                            <span id="total-hash-rate">0 H/s</span>
+                            <span id="boost-indicator"></span>
+                            <span id="boost-timer"></span>
+                        </span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Manual Click Power:</span>
+                        <span id="click-hash-rate">1 H/click</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Auto H/s (Boostable Base):</span>
+                        <span id="auto-hash-rate">0 H/s</span>
+                    </div>
+                </section>
+
+                <section id="settings-panel" aria-labelledby="settings-heading">
+                    <h2 id="settings-heading"><span class="header-icon">⚙️</span> Game Settings</h2>
+                    <div class="setting-item">
+                        <label for="mining-mode-selector" class="setting-label">Mining Mode:</label>
+                        <div id="mining-mode-selector">
+                            <input type="radio" id="solo-mining" name="miningMode" value="solo" checked>
+                            <label for="solo-mining">Solo (Chance)</label>
+                            <input type="radio" id="pool-mining" name="miningMode" value="pool">
+                            <label for="pool-mining">Pool (Guaranteed)</label>
+                        </div>
+                    </div>
+                    <div class="setting-item">
+                        <label for="game-speed-selector" class="setting-label">Game Speed:</label>
+                        <select id="game-speed-selector">
+                            <option value="1">1x (Real-time)</option>
+                            <option value="10">10x</option>
+                            <option value="25">25x</option>
+                            <option value="50">50x</option>
+                            <option value="100">100x</option>
+                            <option value="1440">1 Day / Min (1440x)</option>
+                            <option value="8640">1 Day / 10 Sec (8640x)</option>
+                            <option value="86400">1 Day / Sec (86400x)</option>
+                        </select>
+                    </div>
+                    <div class="setting-item">
+                        <label for="toggle-popups-button" class="setting-label">Pop-up Alerts:</label>
+                        <button id="toggle-popups-button">Disable Pop-up Notifications</button>
+                    </div>
+                </section>
+
+                <section id="interaction-panel" aria-labelledby="interaction-heading">
+                    <h2 id="interaction-heading"><span class="header-icon">⛏️</span> Mining Operation</h2>
+                    <div id="click-mine-button-wrapper" style="position: relative;">
+                        <button id="click-mine-button" aria-label="Generate Hashes">Click to Generate Hashes</button>
+                        <div id="click-particle-container"></div>
+                    </div>
+                    <div class="progress-bar-container" aria-label="Progress towards next block">
+                        <div id="hashes-progress-bar"></div>
+                    </div>
+                    <div id="game-messages" role="log" aria-live="polite"></div>
+                    <button id="toggle-auto-buy-button">Enable Auto-Buy Upgrades</button>
+                </section>
+
+                <section id="market-panel" aria-labelledby="market-heading">
+                    <h2 id="market-heading"><span class="header-icon">📈</span> Crypto Exchange</h2>
+                    <div class="market-info">Current Fluctuating Price: <span id="market-btc-price">$0 / BTC</span></div>
+                    <div class="sell-controls">
+                        <input type="number" id="sell-btc-amount-input" placeholder="BTC to sell" min="0" step="0.0001" aria-label="Amount of BTC to sell">
+                        <button id="sell-btc-button">Sell BTC</button>
+                        <button id="sell-all-btc-button">Sell All BTC</button>
+                    </div>
+                </section>
+            </div>
+
+            <section id="buildings-panel" aria-labelledby="buildings-heading">
+                <h2 id="buildings-heading"><span class="header-icon">🏗️</span> Upgrades & Buildings</h2>
+                <div id="buildings-container">
+                    <!-- Building cards will be dynamically inserted here -->
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <script type="module" src="index.tsx"></script>
+</body>
+</html>
